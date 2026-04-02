@@ -3,152 +3,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BusBuddy - Login</title>
+    <title>BusBuddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --accent: #76b900;
+            --accent-dim: rgba(118, 185, 0, 0.1);
+            --bg: #080808;
+            --bg-input: #141414;
+            --border: rgba(255,255,255,0.06);
+            --border-hover: rgba(255,255,255,0.12);
+            --border-focus: rgba(118,185,0,0.4);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.45);
+            --text-muted: rgba(255,255,255,0.18);
+        }
+
+        html, body { height: 100%; }
 
         body {
-            background: #0a0a12;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: var(--bg);
             min-height: 100vh;
-            font-family: 'Segoe UI', sans-serif;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
         }
 
-        .container {
+        .left {
             position: relative;
-            width: 380px;
-            padding: 40px;
-            background: #0f0f1a;
-            border-radius: 20px;
-            z-index: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px;
+            border-right: 0.5px solid var(--border);
+            overflow: hidden;
         }
 
-        /* BORDER GLOW EFFECT */
-        .container::before {
-            content: '';
+        .left-bg {
             position: absolute;
-            inset: -2px;
-            border-radius: 22px;
-            background: linear-gradient(135deg, #00ff88, #0066ff, #00ff88);
-            background-size: 300% 300%;
-            animation: glowRotate 3s linear infinite;
-            z-index: -1;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 80%, rgba(118,185,0,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 80% 20%, rgba(255,255,255,0.02) 0%, transparent 60%);
         }
 
-        .container::after {
-            content: '';
+        .grid-lines {
             position: absolute;
-            inset: -6px;
-            border-radius: 26px;
-            background: linear-gradient(135deg, #00ff88, #0066ff, #00ff88);
-            background-size: 300% 300%;
-            animation: glowRotate 3s linear infinite;
-            z-index: -2;
-            filter: blur(10px);
-            opacity: 0.5;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
         }
 
-        @keyframes glowRotate {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        .left-content { position: relative; z-index: 2; }
+
+        .wordmark {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-primary);
         }
 
-        .logo {
-            text-align: center;
-            font-size: 36px;
-            margin-bottom: 8px;
-        }
+        .wordmark span { color: var(--accent); }
 
-        .app-name {
-            text-align: center;
-            font-size: 28px;
-            font-weight: bold;
-            color: #00ff88;
-            margin-bottom: 6px;
-        }
+        .left-bottom { position: relative; z-index: 2; }
 
-        .tagline {
-            text-align: center;
-            font-size: 13px;
-            color: #555;
-            margin-bottom: 35px;
-        }
-
-        .input-group {
+        .big-headline {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(36px, 4vw, 52px);
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.05;
+            letter-spacing: -1.5px;
             margin-bottom: 20px;
         }
 
-        .input-group label {
-            display: block;
+        .big-headline .accent-word { color: var(--accent); }
+        .big-headline .dim-word { color: rgba(255,255,255,0.25); }
+
+        .left-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            max-width: 320px;
+            margin-bottom: 36px;
+        }
+
+        .stats { display: flex; gap: 32px; }
+
+        .stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .stat-num span { color: var(--accent); }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-top: 2px;
+        }
+
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 12px;
+            background: var(--accent-dim);
+            border: 0.5px solid rgba(118,185,0,0.2);
+            border-radius: 4px;
+            margin-bottom: 48px;
+        }
+
+        .live-dot {
+            width: 5px; height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: blink 1.8s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .live-text {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px;
+        }
+
+        .form-wrap {
+            width: 100%;
+            max-width: 360px;
+            animation: slideIn 0.7s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .form-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .form-sub {
             font-size: 13px;
-            color: #888;
-            margin-bottom: 8px;
+            color: var(--text-secondary);
+            margin-bottom: 36px;
+            line-height: 1.5;
         }
 
-        .input-group input {
+        .field { margin-bottom: 14px; }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        .field input {
             width: 100%;
-            padding: 14px 16px;
-            background: #1a1a2e;
-            border: 1px solid #222;
-            border-radius: 12px;
-            color: white;
-            font-size: 15px;
+            padding: 13px 16px;
+            background: var(--bg-input);
+            border: 0.5px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
             outline: none;
-            transition: border 0.3s;
+            transition: border-color 0.2s, background 0.2s;
+            -webkit-appearance: none;
         }
 
-        .input-group input:focus {
-            border-color: #00ff88;
+        .field input::placeholder { color: var(--text-muted); }
+        .field input:hover { border-color: var(--border-hover); }
+        .field input:focus {
+            border-color: var(--border-focus);
+            background: rgba(118,185,0,0.03);
         }
 
-        .btn {
+        .btn-primary {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #00ff88, #0066ff);
+            padding: 13px 16px;
+            background: var(--accent);
             border: none;
-            border-radius: 12px;
-            color: #0a0a12;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 6px;
+            color: #0a0a0a;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
             cursor: pointer;
-            margin-top: 10px;
-            transition: opacity 0.3s;
+            margin-top: 20px;
+            transition: background 0.2s, transform 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .btn:hover {
-            opacity: 0.85;
+        .btn-primary:hover { background: #8fd400; }
+        .btn-primary:active { transform: scale(0.99); }
+
+        .arrow { transition: transform 0.2s; }
+        .btn-primary:hover .arrow { transform: translateX(3px); }
+
+        .sep {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
         }
 
-        .footer-text {
-            text-align: center;
-            font-size: 12px;
-            color: #444;
-            margin-top: 25px;
+        .sep::before, .sep::after {
+            content: '';
+            flex: 1;
+            height: 0.5px;
+            background: var(--border);
+        }
+
+        .sep span {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .btn-ghost {
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: 0.5px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s, background 0.2s;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.03);
+        }
+
+        .form-footer {
+            margin-top: 28px;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .form-footer a {
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            border-bottom: 0.5px solid rgba(255,255,255,0.1);
+        }
+
+        .form-footer a:hover { color: var(--text-secondary); }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.03) 2px,
+                rgba(0,0,0,0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @media (max-width: 700px) {
+            body { grid-template-columns: 1fr; }
+            .left { display: none; }
+            .right { padding: 32px 24px; align-items: flex-start; padding-top: 80px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">🚌</div>
-        <div class="app-name">BusBuddy</div>
-        <div class="tagline">Smart travel. Know before you board.</div>
 
-        <div class="input-group">
-            <label>Phone Number</label>
-            <input type="text" placeholder="+91 98765 43210">
-        </div>
+<div class="left">
+    <div class="left-bg"></div>
+    <div class="grid-lines"></div>
 
-        <div class="input-group">
-            <label>Password</label>
-            <input type="password" placeholder="Enter your password">
-        </div>
-
-        <button class="btn" onclick="window.location.href='/home'">Login →</button>
-
-        <div class="footer-text">BusBuddy © 2026 • Tamil Nadu</div>
+    <div class="left-content">
+        <div class="wordmark">Bus<span>Buddy</span></div>
     </div>
+
+    <div class="left-bottom">
+        <div class="live-badge">
+            <div class="live-dot"></div>
+            <div class="live-text">System Online</div>
+        </div>
+
+        <div class="big-headline">
+            Don't wait.<br>
+            <span class="accent-word">Know</span> the<br>
+            <span class="dim-word">crowd.</span>
+        </div>
+
+        <div class="left-desc">
+            Real-time passenger intelligence for Tamil Nadu's bus network. ML-powered crowd detection. Zero guesswork.
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-num">21<span>C</span></div>
+                <div class="stat-label">Routes live</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num"><span>&lt;</span>1s</div>
+                <div class="stat-label">Update latency</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">YOLOv<span>8</span></div>
+                <div class="stat-label">ML model</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="right">
+    <div class="form-wrap">
+        <div class="form-title">Sign in</div>
+        <div class="form-sub">Enter your credentials to access the dashboard.</div>
+
+        <div class="field">
+            <label>Phone number</label>
+            <input type="tel" placeholder="+91 98765 43210" autocomplete="tel">
+        </div>
+
+        <div class="field">
+            <label>Password</label>
+            <input type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+
+        <button class="btn-primary" onclick="window.location.href='/home'">
+            Continue <span class="arrow">→</span>
+        </button>
+
+        <div class="sep"><span>or</span></div>
+
+        <button class="btn-ghost">Continue with OTP</button>
+
+        <div class="form-footer">
+            By signing in you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.<br>
+            BusBuddy &copy; 2026 · Tamil Nadu Transport
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

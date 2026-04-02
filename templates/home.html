@@ -3,116 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BusBuddy - Home</title>
+    <title>BusBuddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            background: #0a0a12;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            padding: 20px;
+        :root {
+            --accent: #76b900;
+            --accent-dim: rgba(118,185,0,0.12);
+            --bg: #080808;
+            --bg-card: #111111;
+            --bg-input: #1a1a1a;
+            --border: rgba(255,255,255,0.07);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.45);
+            --text-muted: rgba(255,255,255,0.2);
+            --green: #30d158;
+            --amber: #ffd60a;
+            --red: #ff453a;
+            --nav-height: 64px;
         }
 
+        html, body {
+            height: 100%;
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* HEADER */
         .header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            justify-content: space-between;
+            padding: 16px 20px 12px;
+            background: var(--bg);
+            border-bottom: 0.5px solid var(--border);
+            z-index: 100;
+            flex-shrink: 0;
         }
 
-        .app-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #00ff88;
+        .header-left { display: flex; flex-direction: column; gap: 2px; }
+
+        .wordmark {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
         }
+
+        .wordmark span { color: var(--accent); }
 
         .greeting {
-            font-size: 13px;
-            color: #555;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        .icon-btn {
+            width: 36px; height: 36px;
+            background: var(--bg-card);
+            border: 0.5px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover { background: var(--bg-input); }
+
+        /* SEARCH BAR */
+        .search-wrap {
+            padding: 12px 20px;
+            background: var(--bg);
+            flex-shrink: 0;
         }
 
         .search-bar {
             width: 100%;
-            padding: 14px 16px;
-            background: #1a1a2e;
-            border: 1px solid #222;
-            border-radius: 12px;
-            color: white;
-            font-size: 15px;
+            padding: 11px 16px 11px 38px;
+            background: var(--bg-input);
+            border: 0.5px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
             outline: none;
-            margin-bottom: 25px;
-        }
-
-        .search-bar:focus {
-            border-color: #00ff88;
-        }
-
-        .section-title {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .bus-card {
+            transition: border-color 0.2s;
             position: relative;
-            background: #0f0f1a;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border: 1px solid #1a1a2e;
-            overflow: hidden;
-            transition: border 0.3s;
+        }
+
+        .search-bar::placeholder { color: var(--text-muted); }
+        .search-bar:focus { border-color: rgba(118,185,0,0.3); }
+
+        .search-wrap-inner {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        /* MAP */
+        .map-section {
+            flex-shrink: 0;
+            height: 42vh;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Override leaflet for dark mode */
+        .leaflet-container {
+            background: #1a1a1a !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        .leaflet-tile {
+            filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.8);
+        }
+
+        /* Map overlay badge */
+        .map-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: rgba(8,8,8,0.85);
+            border: 0.5px solid var(--border);
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .map-dot {
+            width: 5px; height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: blink 1.8s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .map-badge-text {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        /* BOTTOM SHEET */
+        .bottom-sheet {
+            flex: 1;
+            background: var(--bg);
+            border-top: 0.5px solid var(--border);
+            overflow-y: auto;
+            padding: 16px 20px;
+            padding-bottom: calc(var(--nav-height) + 16px);
+        }
+
+        .sheet-handle {
+            width: 36px; height: 3px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin: 0 auto 16px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
+        }
+
+        /* BUS CARD */
+        .bus-card {
+            background: var(--bg-card);
+            border: 0.5px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
         }
 
         .bus-card:hover {
-            border-color: #00ff88;
+            border-color: rgba(255,255,255,0.12);
+            background: #161616;
         }
 
         .bus-card-top {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
+            align-items: flex-start;
+            margin-bottom: 10px;
         }
 
-        .bus-number {
-            font-size: 22px;
-            font-weight: bold;
+        .bus-info { display: flex; flex-direction: column; gap: 3px; }
+
+        .bus-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
         }
 
-        .crowd-badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
+        .bus-route {
+            font-size: 12px;
+            color: var(--text-muted);
         }
 
-        .empty { background: #0a2a1a; color: #00ff88; }
-        .moderate { background: #2a1a00; color: #ffaa00; }
-        .crowded { background: #2a0a0a; color: #ff4444; }
-
-        .route {
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 12px;
+        .crowd-pill {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
+
+        .pill-green { background: rgba(48,209,88,0.12); color: #30d158; }
+        .pill-amber { background: rgba(255,214,10,0.12); color: #ffd60a; }
+        .pill-red { background: rgba(255,69,58,0.12); color: #ff453a; }
 
         .meter {
             width: 100%;
-            height: 6px;
-            background: #1a1a2e;
-            border-radius: 10px;
+            height: 3px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 2px;
             overflow: hidden;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .meter-fill {
             height: 100%;
-            border-radius: 10px;
+            border-radius: 2px;
             transition: width 0.5s ease, background 0.5s ease;
         }
 
@@ -122,165 +279,348 @@
             align-items: center;
         }
 
-        .suggestion {
-            font-size: 13px;
-            color: #aaa;
+        .suggestion-text {
+            font-size: 12px;
+            color: var(--text-secondary);
         }
 
-        .eta {
-            font-size: 13px;
-            color: #555;
+        .eta-text {
+            font-size: 11px;
+            color: var(--text-muted);
         }
 
+        /* BOTTOM NAV */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #0f0f1a;
-            border-top: 1px solid #1a1a2e;
+            bottom: 0; left: 0; right: 0;
+            height: var(--nav-height);
+            background: rgba(8,8,8,0.95);
+            border-top: 0.5px solid var(--border);
             display: flex;
+            align-items: center;
             justify-content: space-around;
-            padding: 15px 0;
+            padding: 0 8px;
+            backdrop-filter: blur(20px);
+            z-index: 200;
         }
 
         .nav-item {
-            text-align: center;
-            font-size: 11px;
-            color: #555;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            border-radius: 10px;
             cursor: pointer;
+            transition: background 0.2s;
         }
 
-        .nav-item.active {
-            color: #00ff88;
+        .nav-item:hover { background: rgba(255,255,255,0.04); }
+
+        .nav-icon { font-size: 18px; }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
         }
 
-        .nav-icon {
-            font-size: 22px;
-            margin-bottom: 4px;
+        .nav-item.active .nav-label { color: var(--accent); }
+        .nav-item.active .nav-icon { filter: none; }
+
+        /* Custom bus marker */
+        .bus-marker {
+            width: 36px; height: 36px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 2px solid #080808;
+            box-shadow: 0 0 12px rgba(118,185,0,0.4);
         }
 
-        .content {
-            padding-bottom: 80px;
+        /* Leaflet popup dark */
+        .leaflet-popup-content-wrapper {
+            background: #111111 !important;
+            border: 0.5px solid rgba(255,255,255,0.1) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+            color: white !important;
+        }
+
+        .leaflet-popup-tip { background: #111111 !important; }
+
+        .popup-content { padding: 4px; }
+
+        .popup-bus-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 3px;
+        }
+
+        .popup-route {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 10px;
+        }
+
+        .popup-count {
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            color: white;
+            margin-bottom: 2px;
+        }
+
+        .popup-status {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .popup-suggestion {
+            font-size: 11px;
+            color: rgba(255,255,255,0.45);
         }
     </style>
 </head>
 <body>
+
+<div class="app">
+
+    <!-- HEADER -->
     <div class="header">
-        <div>
-            <div class="app-name">🚌 BusBuddy</div>
-            <div class="greeting">Good morning, Vishnu 👋</div>
+        <div class="header-left">
+            <div class="wordmark">Bus<span>Buddy</span></div>
+            <div class="greeting">Good morning, Vishnu</div>
         </div>
-        <div style="font-size: 24px;">🔔</div>
+        <div class="header-right">
+            <div class="icon-btn">🔔</div>
+            <div class="icon-btn">👤</div>
+        </div>
     </div>
 
-    <input class="search-bar" type="text" placeholder="🔍 Search route or bus stop...">
+    <!-- SEARCH -->
+    <div class="search-wrap">
+        <div class="search-wrap-inner">
+            <span class="search-icon">🔍</span>
+            <input class="search-bar" type="text" placeholder="Search route or stop...">
+        </div>
+    </div>
 
-    <div class="content">
-        <div class="section-title">Nearby Buses</div>
+    <!-- MAP -->
+    <div class="map-section">
+        <div id="map"></div>
+        <div class="map-badge">
+            <div class="map-dot"></div>
+            <div class="map-badge-text">1 bus live</div>
+        </div>
+    </div>
 
-        <!-- Bus Card 1 - Live ML Data -->
+    <!-- BOTTOM SHEET -->
+    <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="section-label">Nearby Buses</div>
+
+        <!-- Bus 66 — LIVE -->
         <div class="bus-card">
             <div class="bus-card-top">
-                <div class="bus-number">Bus 66</div>
-                <div class="crowd-badge empty" id="badge">Loading...</div>
+                <div class="bus-info">
+                    <div class="bus-num">Bus 66</div>
+                    <div class="bus-route">Tambaram → Koyambedu</div>
+                </div>
+                <div class="crowd-pill pill-green" id="badge">Loading...</div>
             </div>
-            <div class="route">🛣️ Tambaram → poonamalle</div>
             <div class="meter">
                 <div class="meter-fill" id="meter"></div>
             </div>
             <div class="bus-card-bottom">
-                <div class="suggestion" id="suggestion">Fetching data...</div>
-                <div class="eta">🕐 ETA 3 mins</div>
+                <div class="suggestion-text" id="suggestion">Fetching data...</div>
+                <div class="eta-text">ETA 3 min</div>
             </div>
         </div>
 
-        <!-- Bus Card 2 - Static for demo -->
+        <!-- Bus 21C — Static -->
         <div class="bus-card">
             <div class="bus-card-top">
-                <div class="bus-number">Bus 45G</div>
-                <div class="crowd-badge crowded">🔴 Crowded</div>
+                <div class="bus-info">
+                    <div class="bus-num">Bus 21C</div>
+                    <div class="bus-route">Tambaram → T.Nagar</div>
+                </div>
+                <div class="crowd-pill pill-red">Crowded</div>
             </div>
-            <div class="route">🛣️ Tambaram → T.Nagar</div>
             <div class="meter">
-                <div class="meter-fill" style="width: 85%; background: #ff4444;"></div>
+                <div class="meter-fill" style="width:82%; background:#ff453a;"></div>
             </div>
             <div class="bus-card-bottom">
-                <div class="suggestion">❌ Wait for next bus</div>
-                <div class="eta">🕐 ETA 7 mins</div>
+                <div class="suggestion-text">Wait for next bus</div>
+                <div class="eta-text">ETA 7 min</div>
             </div>
         </div>
 
-        <!-- Bus Card 3 - Static for demo -->
+        <!-- Bus 45G — Static -->
         <div class="bus-card">
             <div class="bus-card-top">
-                <div class="bus-number">Bus 12B</div>
-                <div class="crowd-badge moderate">🟡 Moderate</div>
+                <div class="bus-info">
+                    <div class="bus-num">Bus 45G</div>
+                    <div class="bus-route">Tambaram → Guindy</div>
+                </div>
+                <div class="crowd-pill pill-amber">Moderate</div>
             </div>
-            <div class="route">🛣️ Tambaram → Guindy</div>
             <div class="meter">
-                <div class="meter-fill" style="width: 45%; background: #ffaa00;"></div>
+                <div class="meter-fill" style="width:45%; background:#ffd60a;"></div>
             </div>
             <div class="bus-card-bottom">
-                <div class="suggestion">⚠️ Okay to board</div>
-                <div class="eta">🕐 ETA 5 mins</div>
+                <div class="suggestion-text">Okay to board</div>
+                <div class="eta-text">ETA 5 min</div>
             </div>
         </div>
+
     </div>
 
-    <div class="bottom-nav">
-        <div class="nav-item active">
-            <div class="nav-icon">🏠</div>
-            Home
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">🗺️</div>
-            Map
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">🔔</div>
-            Alerts
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">👤</div>
-            Profile
-        </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <div class="nav-item active">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label" style="color: var(--accent);">Home</div>
     </div>
+    <div class="nav-item">
+        <div class="nav-icon">🗺️</div>
+        <div class="nav-label">Map</div>
+    </div>
+    <div class="nav-item">
+        <div class="nav-icon">🔔</div>
+        <div class="nav-label">Alerts</div>
+    </div>
+    <div class="nav-item">
+        <div class="nav-icon">👤</div>
+        <div class="nav-label">Profile</div>
+    </div>
+</div>
 
-    <script>
-        function updateCount() {
-            fetch('/count')
-                .then(res => res.json())
-                .then(data => {
-                    const count = data.count;
-                    const max = 50;
-                    const percent = Math.min((count / max) * 100, 100);
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // Tambaram coordinates
+    const TAMBARAM = [12.9249, 80.1000];
 
-                    const meter = document.getElementById('meter');
-                    const badge = document.getElementById('badge');
-                    const suggestion = document.getElementById('suggestion');
+    // Init map
+    const map = L.map('map', {
+        center: TAMBARAM,
+        zoom: 15,
+        zoomControl: false,
+        attributionControl: false
+    });
 
-                    meter.style.width = percent + '%';
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-                    if (count ==0) {
-                        meter.style.background = '#00ff88';
-                        badge.className = 'crowd-badge empty';
-                        badge.innerText = '🟢 Empty';
-                        suggestion.innerText = '✅ Safe to board!';
-                    } else if (count < 3) {
-                        meter.style.background = '#ffaa00';
-                        badge.className = 'crowd-badge moderate';
-                        badge.innerText = '🟡 Moderate';
-                        suggestion.innerText = '⚠️ Okay to board';
-                    } else {
-                        meter.style.background = '#ff4444';
-                        badge.className = 'crowd-badge crowded';
-                        badge.innerText = '🔴 Crowded';
-                        suggestion.innerText = '❌ Wait for next bus';
-                    }
-                });
-        }
-        setInterval(updateCount, 1000);
-    </script>
+    // Custom bus marker
+    const busIcon = L.divIcon({
+        html: `<div style="
+            width:36px;height:36px;
+            background:#76b900;
+            border-radius:50%;
+            display:flex;align-items:center;justify-content:center;
+            font-size:16px;
+            border:2.5px solid #080808;
+            box-shadow:0 0 14px rgba(118,185,0,0.5);
+        ">🚌</div>`,
+        className: '',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+    });
+
+    // Bus 66 marker
+    const busMarker = L.marker(TAMBARAM, { icon: busIcon }).addTo(map);
+
+    // Popup
+    const popup = L.popup({
+        closeButton: false,
+        className: 'dark-popup',
+        offset: [0, -18]
+    });
+
+    busMarker.on('click', () => {
+        const count = parseInt(document.getElementById('badge').innerText) || 0;
+        const statusText = document.getElementById('suggestion').innerText;
+        const badgeText = document.getElementById('badge').innerText;
+
+        popup.setLatLng(TAMBARAM)
+            .setContent(`
+                <div class="popup-content">
+                    <div class="popup-bus-num">Bus 66</div>
+                    <div class="popup-route">Tambaram → Koyambedu</div>
+                    <div class="popup-count" id="popup-count">${currentCount}</div>
+                    <div class="popup-status" id="popup-status" style="color:${currentColor}">${badgeText}</div>
+                    <div class="popup-suggestion">${statusText}</div>
+                </div>
+            `)
+            .openOn(map);
+    });
+
+    // Simulated bus movement
+    let lat = TAMBARAM[0];
+    let lng = TAMBARAM[1];
+
+    function moveBus() {
+        lat += 0.00005;
+        lng += 0.00003;
+        busMarker.setLatLng([lat, lng]);
+    }
+
+    setInterval(moveBus, 3000);
+
+    // Live crowd count
+    let currentCount = 0;
+    let currentColor = '#30d158';
+
+    function updateCount() {
+        fetch('/count')
+            .then(res => res.json())
+            .then(data => {
+                currentCount = data.count;
+                const max = 50;
+                const percent = Math.min((currentCount / max) * 100, 100);
+
+                const meter = document.getElementById('meter');
+                const badge = document.getElementById('badge');
+                const suggestion = document.getElementById('suggestion');
+
+                meter.style.width = percent + '%';
+
+                if (currentCount === 0) {
+                    currentColor = '#30d158';
+                    meter.style.background = '#30d158';
+                    badge.className = 'crowd-pill pill-green';
+                    badge.innerText = 'Empty';
+                    suggestion.innerText = 'Safe to board';
+                    busMarker._icon.querySelector('div').style.background = '#76b900';
+                } else if (currentCount < 3) {
+                    currentColor = '#ffd60a';
+                    meter.style.background = '#ffd60a';
+                    badge.className = 'crowd-pill pill-amber';
+                    badge.innerText = 'Moderate';
+                    suggestion.innerText = 'Okay to board';
+                    busMarker._icon.querySelector('div').style.background = '#ffd60a';
+                } else {
+                    currentColor = '#ff453a';
+                    meter.style.background = '#ff453a';
+                    badge.className = 'crowd-pill pill-red';
+                    badge.innerText = 'Crowded';
+                    suggestion.innerText = 'Wait for next bus';
+                    busMarker._icon.querySelector('div').style.background = '#ff453a';
+                }
+            });
+    }
+
+    setInterval(updateCount, 1000);
+</script>
+
 </body>
 </html>
