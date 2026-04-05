@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus 66 Tracker</title>
+    <style>
+        body {
+            background: #080808;
+            color: white;
+            font-family: Inter, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 12px;
+        }
+        .status {
+            font-size: 14px;
+            color: #76b900;
+        }
+        .dot {
+            width: 10px; height: 10px;
+            background: #76b900;
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div style="font-size: 24px; font-weight: 700;">Bus 66</div>
+    <div class="status"><span class="dot"></span>Transmitting GPS...</div>
+    <div style="font-size: 12px; color: rgba(255,255,255,0.3);">Keep this page open</div>
+
+    <script>
+        function sendBusGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    fetch('/update_location', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            lat: pos.coords.latitude,
+                            lng: pos.coords.longitude
+                        })
+                    });
+                });
+            }
+        }
+        setInterval(sendBusGPS, 3000);
+    </script>
+</body>
+</html>

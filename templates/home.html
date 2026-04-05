@@ -564,14 +564,13 @@
             .openOn(map);
     });
 
-    // Simulated bus movement
-    let lat = TAMBARAM[0];
-    let lng = TAMBARAM[1];
-
+    // Fetch real bus GPS from phone via /bus_tracker
     function moveBus() {
-        lat += 0.00005;
-        lng += 0.00003;
-        busMarker.setLatLng([lat, lng]);
+        fetch('/bus_location')
+            .then(res => res.json())
+            .then(data => {
+                busMarker.setLatLng([data.lat, data.lng]);
+            });
     }
 
     setInterval(moveBus, 3000);
@@ -620,6 +619,48 @@
     }
 
     setInterval(updateCount, 1000);
+
+    let userMarker = null;
+
+function trackUser() {
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(pos => {
+            const userLat = pos.coords.latitude;
+            const userLng = pos.coords.longitude;
+
+            const userIcon = L.divIcon({
+                html: `<div style="
+                    width:16px;height:16px;
+                    background:#0a84ff;
+                    border-radius:50%;
+                    border:3px solid white;
+                    box-shadow:0 0 10px rgba(10,132,255,0.6);
+                "></div>`,
+                className: '',
+                iconSize: [16, 16],
+                iconAnchor: [8, 8]
+            });
+
+            if (userMarker) {
+                userMarker.setLatLng([userLat, userLng]);
+            } else {
+                userMarker = L.marker([userLat, userLng], { icon: userIcon }).addTo(map);
+                map.setView([userLat, userLng], 15);
+            }
+
+            fetch('/update_user_location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lat: userLat,
+                    lng: userLng
+                })
+            });
+        });
+    }
+}
+
+trackUser();
 </script>
 
 </body>

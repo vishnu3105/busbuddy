@@ -3,7 +3,7 @@ from ultralytics import YOLO
 
 model = YOLO('yolov8n.pt')
 
-cap = cv2.VideoCapture('http://hello:hello@192.168.1.8:8080/video')
+cap = cv2.VideoCapture('http://hello:hello@192.168.1.4:8080/video')
 
 while True:
     ret, frame = cap.read()
